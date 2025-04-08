@@ -1,16 +1,16 @@
 [tool.poetry]
-name = "aptos-sdk"
-version = "0.10.0"
-description = "Aptos SDK"
-authors = ["Aptos Labs <opensource@aptoslabs.com>"]
+name = "endless-sdk"
+version = "1.0.0"
+description = "Endless SDK"
+authors = ["Endless Labs <https://www.endless.link/>"]
 license = "Apache-2.0"
 readme = "README.md"
-repository = "https://github.com/aptos-labs/aptos-core"
-homepage = "https://github.com/aptos-labs/aptos-core/tree/main/ecosystem/python/sdk"
-keywords = ["web3", "sdk", "aptos", "blockchain"]
+repository = "https://github.com/endless-labs/endless-move-framework"
+homepage = "https://github.com/endless-labs/endless-move-framework"
+keywords = ["web3", "sdk", "endless", "blockchain"]
 
 [tool.setuptools.package-data]
-"aptos-sdk" = ["py.typed"]
+"endless-sdk" = ["py.typed"]
 
 [tool.poetry.dependencies]
 ecdsa = "0.18.0"
@@ -22,6 +22,8 @@ tomli = "^2.0.1"
 typing-extensions = "^4.4.0"
 behave = "^1.2.6"
 types-six = "^1.16.21.20240513"
+base58 = "^2.1.1"
+aiohttp = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
 autoflake = "2.2.0"

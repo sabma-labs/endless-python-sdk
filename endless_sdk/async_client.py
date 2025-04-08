@@ -75,7 +75,7 @@ class RestClient:
         # long as progress is being made.
         timeout = httpx.Timeout(60.0, pool=None)
         # Default headers
-        headers = {Metadata.Endless_HEADER: Metadata.get_endless_header_val()}
+        headers = {Metadata.ENDLESS_HEADER: Metadata.get_endless_header_val()}
         self.client = httpx.AsyncClient(
             http2=client_config.http2,
             limits=limits,
