@@ -1,0 +1,9 @@
+# **Please** keep this file ordered alphabetically by directory paths.
+
+# Owners for the `.github` directory and all its subdirectories.
+
+/.github/ @endless-labs/developer-platform @endless-labs/security
+
+# Auto-reviewers for all code
+
+* @endless-labs/developer-platform @davidiw @gregnazario
