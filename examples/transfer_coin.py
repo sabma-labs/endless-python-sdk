@@ -8,7 +8,6 @@ from endless_sdk.account import Account
 from endless_sdk.async_client import FaucetClient, IndexerClient, RestClient
 
 from .common import FAUCET_AUTH_TOKEN, FAUCET_URL, INDEXER_URL, NODE_URL
-import pdb
 
 async def main():
     # :!:>section_1

@@ -9,15 +9,16 @@ from endless_sdk.account_address import AccountAddress
 from endless_sdk.endless_token_client import EndlessTokenClient, Object, Property, PropertyMap
 from endless_sdk.async_client import FaucetClient, RestClient
 
-from .common import FAUCET_URL, NODE_URL
 
 
 async def main():
+    NODE_URL =  "https://rpc-test.endless.link/v1"
     rest_client = RestClient(NODE_URL)
-    faucet_client = FaucetClient(FAUCET_URL, rest_client)
+    # faucet_client = FaucetClient(FAUCET_URL, rest_client)
     token_client = EndlessTokenClient(rest_client)
-    alice = Account.generate()
-    bob = Account.generate()
+    alice = Account.load_key("0xcd237d5eb2ee4bfba26b3a8d9dcbe9df3eea33b6409a79e77018a58a5c59411c")
+    bob = Account.load_key("0xf916a2c77c0e07d408d1cb348284c71bf012b9c1d8a33bad1a7aee4fdbaa86ad")  
+    # <:!:section_2
 
     collection_name = "Alice's"
     token_name = "Alice's first token"
@@ -26,9 +27,9 @@ async def main():
     print(f"Alice: {alice.address()}")
     print(f"Bob: {bob.address()}")
 
-    bob_fund = faucet_client.fund_account(alice.address(), 100_000_000)
-    alice_fund = faucet_client.fund_account(bob.address(), 100_000_000)
-    await asyncio.gather(*[bob_fund, alice_fund])
+    # bob_fund = faucet_client.fund_account(alice.address(), 100_000_000)
+    # alice_fund = faucet_client.fund_account(bob.address(), 100_000_000)
+    # await asyncio.gather(*[bob_fund, alice_fund])
 
     print("\n=== Initial Coin Balances ===")
     alice_balance = rest_client.account_balance(alice.address())

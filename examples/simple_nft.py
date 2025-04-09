@@ -6,36 +6,30 @@ import asyncio
 import json
 
 import base58
-import pdb
 from endless_sdk.account import Account
 from endless_sdk.account_address import AccountAddress
 from endless_sdk.endless_tokenv1_client import EndlessTokenV1Client
 from endless_sdk.async_client import FaucetClient, RestClient
 
-from .common import FAUCET_AUTH_TOKEN, FAUCET_URL, NODE_URL
+from .common import NODE_URL
 
 
 async def main():
     rest_client = RestClient(NODE_URL)
-    faucet_client = FaucetClient(FAUCET_URL, rest_client, FAUCET_AUTH_TOKEN)
     token_client = EndlessTokenV1Client(rest_client)
 
     # :!:>section_2
-    alice = Account.load_key("0xcd237d5eb2ee4bfba26b3a8d9dcbe9df3eea33b6409a79e77018a58a5c59411c")
-    bob = Account.load_key("0xf916a2c77c0e07d408d1cb348284c71bf012b9c1d8a33bad1a7aee4fdbaa86ad")  # <:!:section_2
+    #add your wallet private key
+    alice = Account.load_key("")
+    bob = Account.load_key("")  # <:!:section_2
 
-    collection_name = "niraj 040710"
+    collection_name = "niraj 040711"
     token_name = collection_name + " first token"
     property_version = 0
 
     print("\n=== Addresses ===")
     print(f"Alice: {alice.address()}")
     print(f"Bob: {bob.address()}")
-
-    # :!:>section_3
-    # bob_fund = faucet_client.fund_account(alice.address(), 100_000_000)
-    # alice_fund = faucet_client.fund_account(bob.address(), 100_000_000)  # <:!:section_3
-    # await asyncio.gather(*[bob_fund, alice_fund])
 
     print("\n=== Initial Coin Balances ===")
     alice_balance = rest_client.account_balance(alice.address())

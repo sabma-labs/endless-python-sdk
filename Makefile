@@ -25,8 +25,6 @@ lint:
 examples:
 	poetry run python -m examples.endless_token
 	poetry run python -m examples.fee_payer_transfer_coin
-	poetry run python -m examples.rotate_key
-	poetry run python -m examples.read_aggregator
 	poetry run python -m examples.secp256k1_ecdsa_transfer_coin
 	poetry run python -m examples.simple_endless_token
 	poetry run python -m examples.simple_nft

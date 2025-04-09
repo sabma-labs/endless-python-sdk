@@ -9,7 +9,7 @@ from .async_client import ApiError, RestClient
 from .bcs import Serializer
 from .transactions import EntryFunction, TransactionArgument, TransactionPayload
 from .type_tag import TypeTag, StructTag
-import pdb
+
 import base58
 import aiohttp
 import json
@@ -386,7 +386,6 @@ class EndlessTokenV1Client:
         token_name: str,
         property_version: int,
     ) -> Any:
-        pdb.set_trace()
         try:
             # Step 1: Get collection data using the get_collection function
             collection = await self.get_collection(creator, collection_name)

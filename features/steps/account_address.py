@@ -1,7 +1,7 @@
 from behave import then, use_step_matcher, when
 
-from aptos_sdk.account_address import AccountAddress
-from aptos_sdk.bcs import Serializer
+from endless_sdk.account_address import AccountAddress
+from endless_sdk.bcs import Serializer
 
 # Use regular expressions
 use_step_matcher("re")

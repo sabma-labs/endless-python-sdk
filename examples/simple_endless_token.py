@@ -55,20 +55,16 @@ async def main():
     # Create API and faucet clients.
     # :!:>section_1a
     rest_client = RestClient(NODE_URL)
-    faucet_client = FaucetClient(
-        FAUCET_URL, rest_client, FAUCET_AUTH_TOKEN
-    )  # <:!:section_1a
 
     # Create client for working with the token module.
     # :!:>section_1b
     token_client = EndlessTokenClient(rest_client)  # <:!:section_1b
 
     # :!:>section_2
-    alice = Account.generate()
-    bob = Account.generate()  # <:!:section_2
-
-    collection_name = "Alice's"
-    token_name = "Alice's first token"
+    alice = Account.load_key("0xcd237d5eb2ee4bfba26b3a8d9dcbe9df3eea33b6409a79e77018a58a5c59411c")
+    bob = Account.load_key("0xf916a2c77c0e07d408d1cb348284c71bf012b9c1d8a33bad1a7aee4fdbaa86ad")  # <:!:section_2
+    collection_name = "Alice 509"
+    token_name = f"{collection_name} first token"
 
     # :!:>owners
     owners = {str(alice.address()): "Alice", str(bob.address()): "Bob"}  # <:!:owners
@@ -77,10 +73,6 @@ async def main():
     print(f"Alice: {alice.address()}")
     print(f"Bob: {bob.address()}")
 
-    # :!:>section_3
-    bob_fund = faucet_client.fund_account(alice.address(), 100_000_000)
-    alice_fund = faucet_client.fund_account(bob.address(), 100_000_000)  # <:!:section_3
-    await asyncio.gather(*[bob_fund, alice_fund])
 
     print("\n=== Initial Coin Balances ===")
     alice_balance = rest_client.account_balance(alice.address())

@@ -259,7 +259,6 @@ class TransactionPayload:
     value: Any
 
     def __init__(self, payload: Any):
-        # pdb.set_trace()
         if isinstance(payload, Script):
             self.variant = TransactionPayload.SCRIPT
         elif isinstance(payload, ModuleBundle):
@@ -344,7 +343,7 @@ class Script:
     def __str__(self):
         return f"<{self.ty_args}>({self.args})"
 
-import pdb
+
 class ScriptArgument:
     U8: int = 0
     U64: int = 1
@@ -457,8 +456,7 @@ class EntryFunction:
         function: str,
         ty_args: List[TypeTag],
         args: List[TransactionArgument],
-    ) -> EntryFunction:
-        # pdb.set_trace()        
+    ) -> EntryFunction:       
         module_id = ModuleId.from_str(module)
 
         byte_args = []
@@ -500,7 +498,6 @@ class ModuleId:
     @staticmethod
     def from_str(module_id: str) -> ModuleId:
         split = module_id.split("::")
-        # pdb.set_trace()
         return ModuleId(AccountAddress.from_str(split[0]), split[1])
 
     @staticmethod

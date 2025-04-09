@@ -2,7 +2,7 @@ import typing
 
 from behave import given, then, use_step_matcher
 
-from aptos_sdk.account_address import AccountAddress
+from endless_sdk.account_address import AccountAddress
 
 # Use regular expressions
 use_step_matcher("re")

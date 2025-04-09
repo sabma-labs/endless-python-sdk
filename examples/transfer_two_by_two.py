@@ -5,20 +5,19 @@ import asyncio
 import os
 
 from aptos_sdk.account import Account
-from aptos_sdk.async_client import FaucetClient, RestClient
+from aptos_sdk.async_client import  RestClient
 from aptos_sdk.transactions import Script, ScriptArgument, TransactionPayload
 
-from .common import FAUCET_AUTH_TOKEN, FAUCET_URL, NODE_URL
+from .common import  NODE_URL
 
 
 async def main():
     rest_client = RestClient(NODE_URL)
-    faucet_client = FaucetClient(FAUCET_URL, rest_client, FAUCET_AUTH_TOKEN)
 
-    alice = Account.generate()
-    bob = Account.generate()
-    carol = Account.generate()
-    david = Account.generate()
+    alice = Account.load_key("")
+    bob = Account.load_key("")
+    carol = Account.load_key("")
+    david = Account.load_key("")
 
     print("\n=== Addresses ===")
     print(f"Alice: {alice.address()}")
@@ -26,11 +25,7 @@ async def main():
     print(f"Carol: {carol.address()}")
     print(f"David: {david.address()}")
 
-    alice_fund = faucet_client.fund_account(alice.address(), 100_000_000)
-    bob_fund = faucet_client.fund_account(bob.address(), 100_000_000)
-    carol_fund = faucet_client.fund_account(carol.address(), 0)
-    david_fund = faucet_client.fund_account(david.address(), 0)
-    await asyncio.gather(*[alice_fund, bob_fund, carol_fund, david_fund])
+    
 
     alice_balance = rest_client.account_balance(alice.address())
     bob_balance = rest_client.account_balance(bob.address())

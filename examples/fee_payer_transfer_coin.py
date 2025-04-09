@@ -28,11 +28,10 @@ async def main():
 
     # :!:>section_2
     # alice = Account.generate()
+    
+    alice =  Account.load_key("")
     bob = Account.generate()
-    alice =  Account.load_key("0x48ca3b85eaf1b2d6658d662a34a572f6eada8076f14e93d36e6291edff564086")
-    # bob =  Account.load_key("0x7bdbb1a41263b886e8d1fe5f5299874310946e9ef4a2a9317c2c632bcb5641d9")
-  
-    sponsor = Account.load_key("0x1f0d583703abaa2b9b020a9a84a930838c5ad6e777851cc36a28aa44f68f9484")  # <:!:section_2
+    sponsor = Account.load_key("")  # <:!:section_2
 
     print("\n=== Addresses ===")
     print(f"Alice: {alice.address()}")

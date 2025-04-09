@@ -7,10 +7,8 @@ import logging
 import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
-import pdb
 import httpx
 import python_graphql_client
-import pdb
 from .account import Account
 from .account_address import AccountAddress
 from .authenticator import Authenticator, MultiAgentAuthenticator
@@ -687,7 +685,6 @@ class RestClient:
         payload: TransactionPayload,
         sequence_number: Optional[int] = None,
     ) -> RawTransaction:
-        # pdb.set_trace()
         if isinstance(sender, Account):
             sender_address = sender.address()
         else:
