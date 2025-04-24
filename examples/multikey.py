@@ -11,6 +11,7 @@ from endless_sdk.asymmetric_crypto_wrapper import MultiSignature, Signature
 from endless_sdk.async_client import FaucetClient, IndexerClient, RestClient
 from endless_sdk.authenticator import AccountAuthenticator, MultiKeyAuthenticator
 from endless_sdk.bcs import Serializer
+from endless_sdk.api_config import APIConfig , NetworkType
 from endless_sdk.transactions import (
     EntryFunction,
     SignedTransaction,
@@ -23,14 +24,10 @@ from .common import FAUCET_AUTH_TOKEN, FAUCET_URL, INDEXER_URL, NODE_URL
 
 async def main():
     # :!:>section_1
-    rest_client = RestClient(NODE_URL)
-    faucet_client = FaucetClient(
-        FAUCET_URL, rest_client, FAUCET_AUTH_TOKEN
-    )  # <:!:section_1
-    if INDEXER_URL and INDEXER_URL != "none":
-        IndexerClient(INDEXER_URL)
-    else:
-        pass
+    config_type = NetworkType.TESTNET  # Change to MAINNET or TESTNET as needed.
+    api_config = APIConfig(config_type)
+    rest_client = RestClient(api_config.NODE_URL,api_config.INDEXER_URL)
+    
 
     # :!:>section_2
     key1 = secp256k1_ecdsa.PrivateKey.random()
@@ -52,8 +49,8 @@ async def main():
     print(f"Bob: {bob.address()}")
 
     # :!:>section_3
-    alice_fund = faucet_client.fund_account(alice_address, 100_000_000)
-    bob_fund = faucet_client.fund_account(bob.address(), 0)  # <:!:section_3
+    alice_fund = await rest_client.fund_account(alice_address)
+    bob_fund = await rest_client.fund_account(bob)  # <:!:section_3
     await asyncio.gather(*[alice_fund, bob_fund])
 
     print("\n=== Initial Balances ===")

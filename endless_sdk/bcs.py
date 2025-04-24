@@ -192,12 +192,39 @@ class Serializer:
     ):
         return lambda self, values: self.sequence(values, value_encoder)
     
+    @staticmethod
     def serialize_option(serializer: Serializer, value: typing.Optional[typing.Any]):
         if value is None:
             serializer.u8(0)  # 0 indicates None
         else:
             serializer.u8(1)  # 1 indicates Some
             serializer.struct(value)
+    @staticmethod
+    def option_serializer(
+        value_encoder: typing.Callable[["Serializer", typing.Any], None],
+    ) -> typing.Callable[["Serializer", typing.Optional[typing.Any]], None]:
+        return lambda serializer, val: Serializer._serialize_option(serializer, val, value_encoder)
+    
+    def address(self, addr: str):
+        """
+        Serialize a Move address (32 bytes, big-endian) from hex string.
+        """
+        h = addr[2:] if addr.startswith("0x") else addr
+        h = h.rjust(64, '0')
+        self.fixed_bytes(bytes.fromhex(h))
+    
+    @staticmethod
+    def _serialize_option(
+        serializer: "Serializer",
+        value: typing.Optional[typing.Any],
+        value_encoder: typing.Callable[["Serializer", typing.Any], None],
+    ):
+        # 0 indicates None, 1 indicates Some
+        if value is None:
+            serializer.u8(0)
+        else:
+            serializer.u8(1)
+            value_encoder(serializer, value)
         
     def sequence(
         self,

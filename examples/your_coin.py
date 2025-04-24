@@ -28,8 +28,7 @@ from endless_sdk.transactions import (
     TransactionPayload,
 )
 from endless_sdk.type_tag import StructTag, TypeTag
-
-from .common import FAUCET_AUTH_TOKEN, FAUCET_URL, NODE_URL
+from endless_sdk.api_config import APIConfig , NetworkType
 
 
 class CoinClient(RestClient):
@@ -88,11 +87,12 @@ async def main(moon_coin_path: str):
     print(f"Alice: {alice.address()}")
     print(f"Bob: {bob.address()}")
 
-    rest_client = CoinClient(NODE_URL)
-    faucet_client = FaucetClient(FAUCET_URL, rest_client, FAUCET_AUTH_TOKEN)
+    config_type = NetworkType.LOCAL  # Change to MAINNET or TESTNET as needed.
+    api_config = APIConfig(config_type)
+    rest_client = RestClient(api_config.NODE_URL,api_config.INDEXER_URL)
 
-    alice_fund = faucet_client.fund_account(alice.address(), 20_000_000)
-    bob_fund = faucet_client.fund_account(bob.address(), 20_000_000)
+    alice_fund = await rest_client.fund_account(alice.address(), 20_000_000)
+    bob_fund = await rest_client.fund_account(bob.address(), 20_000_000)
     await asyncio.gather(*[alice_fund, bob_fund])
 
     if EndlessCLIWrapper.does_cli_exist():

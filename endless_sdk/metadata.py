@@ -1,5 +1,4 @@
 import importlib.metadata as metadata
-
 # constants
 PACKAGE_NAME = "endless-sdk"
 

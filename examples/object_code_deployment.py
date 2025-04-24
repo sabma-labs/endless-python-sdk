@@ -10,20 +10,21 @@ from endless_sdk.account import Account
 from endless_sdk.endless_cli_wrapper import EndlessCLIWrapper
 from endless_sdk.async_client import FaucetClient, RestClient
 from endless_sdk.package_publisher import MODULE_ADDRESS, PackagePublisher, PublishMode
-
+from endless_sdk.api_config import APIConfig , NetworkType
 from .common import ENDLESS_CORE_PATH, FAUCET_AUTH_TOKEN, FAUCET_URL, NODE_URL
 
 
 async def main(package_dir):
-    rest_client = RestClient(NODE_URL)
-    faucet_client = FaucetClient(FAUCET_URL, rest_client, FAUCET_AUTH_TOKEN)
+    config_type = NetworkType.LOCAL  # Change to MAINNET or TESTNET as needed.
+    api_config = APIConfig(config_type)
+    rest_client = RestClient(api_config.NODE_URL,api_config.INDEXER_URL)    
     package_publisher = PackagePublisher(rest_client)
     alice = Account.generate()
 
     print("\n=== Publisher Address ===")
     print(f"Alice: {alice.address()}")
 
-    await faucet_client.fund_account(alice.address(), 100_000_000)
+    await rest_client.fund_account(alice.address(), 100_000_000)
 
     print("\n=== Initial Coin Balance ===")
     alice_balance = await rest_client.account_balance(alice.address())

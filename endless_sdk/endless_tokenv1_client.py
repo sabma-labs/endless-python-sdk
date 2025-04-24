@@ -16,7 +16,7 @@ import json
 U64_MAX = 18446744073709551615
 INDEXER_URL = os.getenv(
     "ENDLESS_INDEXER_URL",
-    "https://idx-test.endless.link/api/v1",
+    "http://127.0.0.1:50051/api/v1",
 )
 
 
@@ -151,9 +151,7 @@ class EndlessTokenV1Client:
         collection_name: str,
         name: str,
         description: str,
-        supply: int,
         uri: str,
-        royalty_points_per_million: int,
     ) -> str:
 
         # collection: String,
@@ -402,7 +400,7 @@ class EndlessTokenV1Client:
             page = 0
             total_count = 0
             while True:
-                history_url = f"{INDEXER_URL}/collections/{collection_id}/history"
+                history_url = f"{self._client.indexer_url}/collections/{collection_id}/history"
                 try:
                     async with aiohttp.ClientSession() as session:
                         async with session.get(history_url, params={"page": page}, timeout=10) as response:
@@ -463,7 +461,7 @@ class EndlessTokenV1Client:
             creator_b58 = base58.b58encode(creator_bytes).decode()
 
             page = 0
-            base_url = f"{INDEXER_URL}/collections"
+            base_url = f"{self._client.indexer_url}/collections"
             total_count = 0
             async with aiohttp.ClientSession() as session:
                 while True:

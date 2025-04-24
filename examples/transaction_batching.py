@@ -24,16 +24,16 @@ from endless_sdk.transactions import (
     TransactionArgument,
     TransactionPayload,
 )
-
+from endless_sdk.api_config import APIConfig , NetworkType
 from .common import FAUCET_AUTH_TOKEN, FAUCET_URL, NODE_URL
 
 
-def generate_rest_client(node_url: str) -> RestClient:
+def generate_rest_client(node_url: str, indexer_url: str) -> RestClient:
     client_config = ClientConfig()
     client_config.http2 = True
     client_config.max_gas_amount = 100
     client_config.transaction_wait_in_seconds = 60
-    return RestClient(NODE_URL, client_config)
+    return RestClient(node_url,indexer_url, client_config)
 
 
 class TransactionGenerator:
@@ -296,11 +296,10 @@ class Accounts:
 
 
 async def fund_from_faucet(rest_client: RestClient, source: Account):
-    faucet_client = FaucetClient(FAUCET_URL, rest_client, FAUCET_AUTH_TOKEN)
 
     fund_txns = []
     for _ in range(40):
-        fund_txns.append(faucet_client.fund_account(source.address(), 100_000_000_000))
+        fund_txns.append(await rest_client.fund_account(source.address(), 100_000_000_000))
     await asyncio.gather(*fund_txns)
 
 
@@ -352,7 +351,9 @@ async def distribute(
 
 
 async def main():
-    rest_client = generate_rest_client(NODE_URL)
+    config_type = NetworkType.LOCAL  # Change to MAINNET or TESTNET as needed.
+    api_config = APIConfig(config_type)
+    rest_client = RestClient(api_config.NODE_URL,api_config.INDEXER_URL)
 
     num_accounts = 64
     transactions = 100000

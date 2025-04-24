@@ -15,23 +15,20 @@ from endless_sdk.transactions import (
     TransactionArgument,
     TransactionPayload,
 )
-
-from .common import FAUCET_AUTH_TOKEN, FAUCET_URL, NODE_URL
+from endless_sdk.api_config import APIConfig , NetworkType
 
 
 async def main():
     # :!:>section_1
-    rest_client = RestClient(NODE_URL)
-    # faucet_client = FaucetClient(
-    #     FAUCET_URL, rest_client, FAUCET_AUTH_TOKEN
-    # )  # <:!:section_1
+    config_type = NetworkType.TESTNET  # Change to MAINNET or TESTNET as needed.
+    api_config = APIConfig(config_type)
+    rest_client = RestClient(api_config.NODE_URL,api_config.INDEXER_URL)
+    
 
     # :!:>section_2
-    # alice = Account.generate()
-    
-    alice =  Account.load_key("")
+    alice = Account.generate()
     bob = Account.generate()
-    sponsor = Account.load_key("")  # <:!:section_2
+    sponsor = Account.generate()  # <:!:section_2
 
     print("\n=== Addresses ===")
     print(f"Alice: {alice.address()}")
@@ -39,7 +36,11 @@ async def main():
     print(f"Sponsor: {sponsor.address()}")
 
     # :!:>section_3
-    # await faucet_client.fund_account(sponsor.address(), 100_000_000)  # <:!:section_3
+    print("\n=== Fund Accounts ===")
+    await rest_client.fund_account(alice)
+    await rest_client.fund_account(bob)
+    await rest_client.fund_account(sponsor)
+    # <:!:section_3
 
     print("\n=== Initial Data ===")
     # :!:>section_4

@@ -22,7 +22,7 @@ from endless_sdk.transactions import (
     TransactionPayload,
 )
 from endless_sdk.type_tag import StructTag, TypeTag
-
+from endless_sdk.api_config import APIConfig , NetworkType
 from .common import ENDLESS_CORE_PATH, FAUCET_AUTH_TOKEN, FAUCET_URL, NODE_URL
 
 should_wait = True
@@ -38,8 +38,9 @@ async def main(should_wait_input=True):
     global should_wait
     should_wait = should_wait_input
 
-    rest_client = RestClient(NODE_URL)
-    faucet_client = FaucetClient(FAUCET_URL, rest_client, FAUCET_AUTH_TOKEN)
+    config_type = NetworkType.LOCAL  # Change to MAINNET or TESTNET as needed.
+    api_config = APIConfig(config_type)
+    rest_client = RestClient(api_config.NODE_URL,api_config.INDEXER_URL)
 
     # :!:>section_1
     alice = Account.generate()
@@ -85,10 +86,10 @@ async def main(should_wait_input=True):
     chad_start = 30_000_000
     multisig_start = 40_000_000
 
-    alice_fund = faucet_client.fund_account(alice.address(), alice_start)
-    bob_fund = faucet_client.fund_account(bob.address(), bob_start)
-    chad_fund = faucet_client.fund_account(chad.address(), chad_start)
-    multisig_fund = faucet_client.fund_account(multisig_address, multisig_start)
+    alice_fund = await rest_client.fund_account(alice.address(), alice_start)
+    bob_fund = await rest_client.fund_account(bob.address(), bob_start)
+    chad_fund = await rest_client.fund_account(chad.address(), chad_start)
+    multisig_fund = await rest_client.fund_account(multisig_address, multisig_start)
     await asyncio.gather(*[alice_fund, bob_fund, chad_fund, multisig_fund])
 
     alice_balance = rest_client.account_balance(alice.address())

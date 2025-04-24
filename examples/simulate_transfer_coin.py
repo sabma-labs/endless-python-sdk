@@ -14,22 +14,25 @@ from endless_sdk.transactions import (
     TransactionPayload,
 )
 from endless_sdk.type_tag import StructTag, TypeTag
-
+from endless_sdk.api_config import APIConfig , NetworkType
 from .common import NODE_URL
 
 
 async def main():
-    rest_client = RestClient(NODE_URL)
+    config_type = NetworkType.TESTNET  # Change to MAINNET or TESTNET as needed.
+    api_config = APIConfig(config_type)
+    rest_client = RestClient(api_config.NODE_URL,api_config.INDEXER_URL)
     
-    #add your wallet private key
-    alice =  Account.load_key("")
+    
+    alice =  Account.generate()
     bob =  Account.generate()
 
     print("\n=== Addresses ===")
     print(f"Alice: {alice.address()}")
     print(f"Bob: {bob.address()}")
 
-
+    await rest_client.fund_account(bob)
+    await rest_client.fund_account(alice)
     payload = EntryFunction.natural(
         "0x1::endless_coin",
         "transfer",
@@ -42,7 +45,7 @@ async def main():
     transaction = await rest_client.create_bcs_transaction(
         alice, TransactionPayload(payload)
     )
-
+    
     print("\n=== Simulate before creating Bob's Account ===")
     output = await rest_client.simulate_transaction(transaction, alice)
     if output[0]["vm_status"] == "Executed successfully":

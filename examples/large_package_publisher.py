@@ -19,16 +19,18 @@ from endless_sdk.account_address import AccountAddress
 from endless_sdk.endless_cli_wrapper import EndlessCLIWrapper
 from endless_sdk.async_client import ClientConfig, FaucetClient, RestClient
 from endless_sdk.package_publisher import MODULE_ADDRESS, PackagePublisher
+from endless_sdk.api_config import APIConfig , NetworkType
+from .common import FAUCET_AUTH_TOKEN, FAUCET_URL, NODE_URL
 
-from .common import ENDLESS_CORE_PATH, FAUCET_AUTH_TOKEN, FAUCET_URL, NODE_URL
 
 
 async def publish_large_packages(large_packages_dir) -> AccountAddress:
-    rest_client = RestClient(NODE_URL)
-    faucet_client = FaucetClient(FAUCET_URL, rest_client, FAUCET_AUTH_TOKEN)
+    config_type = NetworkType.LOCAL  # Change to MAINNET or TESTNET as needed.
+    api_config = APIConfig(config_type)
+    rest_client = RestClient(api_config.NODE_URL,api_config.INDEXER_URL)
 
     alice = Account.generate()
-    await faucet_client.fund_account(alice.address(), 1_000_000_000)
+    await rest_client.fund_account(alice.address(), 1_000_000_000)
     await endless_sdk_cli.publish_package(
         large_packages_dir, {"large_packages": alice.address()}, alice, NODE_URL
     )
@@ -46,9 +48,9 @@ async def main(
     faucet_client = FaucetClient(FAUCET_URL, rest_client, FAUCET_AUTH_TOKEN)
 
     alice = Account.generate()
-    req0 = faucet_client.fund_account(alice.address(), 1_000_000_000)
-    req1 = faucet_client.fund_account(alice.address(), 1_000_000_000)
-    req2 = faucet_client.fund_account(alice.address(), 1_000_000_000)
+    req0 = await rest_client.fund_account(alice.address(), 1_000_000_000)
+    req1 = await rest_client.fund_account(alice.address(), 1_000_000_000)
+    req2 = await rest_client.fund_account(alice.address(), 1_000_000_000)
     await asyncio.gather(*[req0, req1, req2])
     alice_balance = await rest_client.account_balance(alice.address())
     print(f"Alice: {alice.address()} {alice_balance}")

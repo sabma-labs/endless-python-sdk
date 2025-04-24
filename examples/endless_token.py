@@ -8,28 +8,27 @@ from endless_sdk.account import Account
 from endless_sdk.account_address import AccountAddress
 from endless_sdk.endless_token_client import EndlessTokenClient, Object, Property, PropertyMap
 from endless_sdk.async_client import FaucetClient, RestClient
-
+from endless_sdk.api_config import APIConfig , NetworkType
 
 
 async def main():
-    NODE_URL =  "https://rpc-test.endless.link/v1"
-    rest_client = RestClient(NODE_URL)
-    # faucet_client = FaucetClient(FAUCET_URL, rest_client)
+    config_type = NetworkType.TESTNET  # Change to MAINNET or TESTNET as needed.
+    api_config = APIConfig(config_type)
+    rest_client = RestClient(api_config.NODE_URL,api_config.INDEXER_URL)
     token_client = EndlessTokenClient(rest_client)
-    alice = Account.load_key("0xcd237d5eb2ee4bfba26b3a8d9dcbe9df3eea33b6409a79e77018a58a5c59411c")
-    bob = Account.load_key("0xf916a2c77c0e07d408d1cb348284c71bf012b9c1d8a33bad1a7aee4fdbaa86ad")  
+    alice = Account.generate()
+    bob = Account.generate()  
     # <:!:section_2
 
-    collection_name = "Alice's"
-    token_name = "Alice's first token"
+    collection_name = "Alice111"
+    token_name = collection_name+"first token"
 
     print("\n=== Addresses ===")
     print(f"Alice: {alice.address()}")
     print(f"Bob: {bob.address()}")
 
-    # bob_fund = faucet_client.fund_account(alice.address(), 100_000_000)
-    # alice_fund = faucet_client.fund_account(bob.address(), 100_000_000)
-    # await asyncio.gather(*[bob_fund, alice_fund])
+    await rest_client.fund_account(alice)
+    await rest_client.fund_account(bob)
 
     print("\n=== Initial Coin Balances ===")
     alice_balance = rest_client.account_balance(alice.address())
@@ -43,82 +42,73 @@ async def main():
     txn_hash = await token_client.create_collection(
         alice,
         "Alice's simple collection",
-        1,
+        100,
         collection_name,
         "https://endless.dev",
-        True,
-        True,
-        True,
-        True,
-        True,
-        True,
-        True,
-        True,
-        True,
         0,
         1,
     )
     await rest_client.wait_for_transaction(txn_hash)
+    print("Done !!!@")
+    # # This is a hack, once we add support for reading events or indexer, this will be easier
+    # resp = await rest_client.account_resource(alice.address(), "0x1::account::Account")
+    # int(resp["data"]["guid_creation_num"])
 
-    # This is a hack, once we add support for reading events or indexer, this will be easier
-    resp = await rest_client.account_resource(alice.address(), "0x1::account::Account")
-    int(resp["data"]["guid_creation_num"])
+    # txn_hash = await token_client.mint_token(
+    #     alice,
+    #     collection_name,
+    #     "Alice's simple token",
+    #     token_name,
+    #     "https://aptos.dev/img/nyan.jpeg",
+    #     PropertyMap([Property.string("string", "string value")]),
+    # )
+    # await rest_client.wait_for_transaction(txn_hash)
 
-    txn_hash = await token_client.mint_token(
-        alice,
-        collection_name,
-        "Alice's simple token",
-        token_name,
-        "https://aptos.dev/img/nyan.jpeg",
-        PropertyMap([Property.string("string", "string value")]),
-    )
-    await rest_client.wait_for_transaction(txn_hash)
+    # minted_tokens = await token_client.tokens_minted_from_transaction(txn_hash)
+    # assert len(minted_tokens) == 1
+    # token_addr = minted_tokens[0]
 
-    minted_tokens = await token_client.tokens_minted_from_transaction(txn_hash)
-    assert len(minted_tokens) == 1
-    token_addr = minted_tokens[0]
+    # collection_addr = AccountAddress.for_named_collection(
+    #     alice.address(), collection_name
+    # )
+    # collection_data = await token_client.read_object(collection_addr)
+    # print(f"Alice's collection: {collection_data}")
+    # token_data = await token_client.read_object(token_addr)
+    # print(f"Alice's token: {token_data}")
 
-    collection_addr = AccountAddress.for_named_collection(
-        alice.address(), collection_name
-    )
-    collection_data = await token_client.read_object(collection_addr)
-    print(f"Alice's collection: {collection_data}")
-    token_data = await token_client.read_object(token_addr)
-    print(f"Alice's token: {token_data}")
+    # txn_hash = await token_client.add_token_property(
+    #     alice, token_addr, Property.bool("test", False)
+    # )
+    # await rest_client.wait_for_transaction(txn_hash)
+    # token_data = await token_client.read_object(token_addr)
+    # print(f"Alice's token: {token_data}")
+    # txn_hash = await token_client.remove_token_property(alice, token_addr, "string")
+    # await rest_client.wait_for_transaction(txn_hash)
+    # token_data = await token_client.read_object(token_addr)
+    # print(f"Alice's token: {token_data}")
+    # txn_hash = await token_client.update_token_property(
+    #     alice, token_addr, Property.bool("test", True)
+    # )
+    # await rest_client.wait_for_transaction(txn_hash)
+    # token_data = await token_client.read_object(token_addr)
+    # print(f"Alice's token: {token_data}")
+    # txn_hash = await token_client.add_token_property(
+    #     alice, token_addr, Property.bytes("bytes", b"\x00\x01")
+    # )
+    # await rest_client.wait_for_transaction(txn_hash)
+    # token_data = await token_client.read_object(token_addr)
+    # print(f"Alice's token: {token_data}")
 
-    txn_hash = await token_client.add_token_property(
-        alice, token_addr, Property.bool("test", False)
-    )
-    await rest_client.wait_for_transaction(txn_hash)
-    token_data = await token_client.read_object(token_addr)
-    print(f"Alice's token: {token_data}")
-    txn_hash = await token_client.remove_token_property(alice, token_addr, "string")
-    await rest_client.wait_for_transaction(txn_hash)
-    token_data = await token_client.read_object(token_addr)
-    print(f"Alice's token: {token_data}")
-    txn_hash = await token_client.update_token_property(
-        alice, token_addr, Property.bool("test", True)
-    )
-    await rest_client.wait_for_transaction(txn_hash)
-    token_data = await token_client.read_object(token_addr)
-    print(f"Alice's token: {token_data}")
-    txn_hash = await token_client.add_token_property(
-        alice, token_addr, Property.bytes("bytes", b"\x00\x01")
-    )
-    await rest_client.wait_for_transaction(txn_hash)
-    token_data = await token_client.read_object(token_addr)
-    print(f"Alice's token: {token_data}")
-
-    print("\n=== Transferring the Token from Alice to Bob ===")
-    print(f"Alice: {alice.address()}")
-    print(f"Bob:   {bob.address()}")
-    print(f"Token: {token_addr}\n")
-    print(f"Owner: {token_data.resources[Object].owner}")
-    print("    ...transferring...    ")
-    txn_hash = await rest_client.transfer_object(alice, token_addr, bob.address())
-    await rest_client.wait_for_transaction(txn_hash)
-    token_data = await token_client.read_object(token_addr)
-    print(f"Owner: {token_data.resources[Object].owner}\n")
+    # print("\n=== Transferring the Token from Alice to Bob ===")
+    # print(f"Alice: {alice.address()}")
+    # print(f"Bob:   {bob.address()}")
+    # print(f"Token: {token_addr}\n")
+    # print(f"Owner: {token_data.resources[Object].owner}")
+    # print("    ...transferring...    ")
+    # txn_hash = await rest_client.transfer_object(alice, token_addr, bob.address())
+    # await rest_client.wait_for_transaction(txn_hash)
+    # token_data = await token_client.read_object(token_addr)
+    # print(f"Owner: {token_data.resources[Object].owner}\n")
 
     await rest_client.close()
 

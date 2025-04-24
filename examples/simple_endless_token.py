@@ -16,8 +16,7 @@ from endless_sdk.endless_token_client import (
     Token,
 )
 from endless_sdk.async_client import FaucetClient, RestClient
-
-from .common import FAUCET_AUTH_TOKEN, FAUCET_URL, NODE_URL
+from endless_sdk.api_config import APIConfig , NetworkType
 
 
 def get_owner(obj: ReadObject) -> AccountAddress:
@@ -54,15 +53,18 @@ async def get_token_data(
 async def main():
     # Create API and faucet clients.
     # :!:>section_1a
-    rest_client = RestClient(NODE_URL)
+    config_type = NetworkType.LOCAL  # Change to MAINNET or TESTNET as needed.
+    api_config = APIConfig(config_type)
+    rest_client = RestClient(api_config.NODE_URL,api_config.INDEXER_URL)
 
     # Create client for working with the token module.
     # :!:>section_1b
     token_client = EndlessTokenClient(rest_client)  # <:!:section_1b
 
     # :!:>section_2
-    alice = Account.load_key("0xcd237d5eb2ee4bfba26b3a8d9dcbe9df3eea33b6409a79e77018a58a5c59411c")
-    bob = Account.load_key("0xf916a2c77c0e07d408d1cb348284c71bf012b9c1d8a33bad1a7aee4fdbaa86ad")  # <:!:section_2
+    alice = Account.generate() 
+    bob = Account.generate()
+    # <:!:section_2
     collection_name = "Alice 509"
     token_name = f"{collection_name} first token"
 

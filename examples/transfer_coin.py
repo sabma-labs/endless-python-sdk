@@ -6,33 +6,27 @@ import asyncio
 import json 
 from endless_sdk.account import Account
 from endless_sdk.async_client import FaucetClient, IndexerClient, RestClient
-
-from .common import FAUCET_AUTH_TOKEN, FAUCET_URL, INDEXER_URL, NODE_URL
+from endless_sdk.api_config import APIConfig , NetworkType
 
 async def main():
     # :!:>section_1
-    rest_client = RestClient("https://rpc-test.endless.link/v1")
-    # faucet_client = FaucetClient(
-    #     FAUCET_URL, rest_client, FAUCET_AUTH_TOKEN
-    # )  # <:!:section_1
-    if INDEXER_URL and INDEXER_URL != "none":
-        indexer_client = IndexerClient(INDEXER_URL)
-    else:
-        indexer_client = None
+    config_type = NetworkType.TESTNET  # Change to MAINNET or TESTNET as needed.
+    api_config = APIConfig(config_type)
+    rest_client = RestClient(api_config.NODE_URL,api_config.INDEXER_URL) # <:!:section_1
 
     # :!:>section_2
-    # alice = Account.generate()
+    alice = Account.generate()
     bob = Account.generate()  # <:!:section_2
-    alice =  Account.load_key("0x48ca3b85eaf1b2d6658d662a34a572f6eada8076f14e93d36e6291edff564086")
-    # bob =  Account.load_key("0x7bdbb1a41263b886e8d1fe5f5299874310946e9ef4a2a9317c2c632bcb5641d9")
+    
     print("\n=== Addresses ===")
     print(f"Alice: {alice.address()}")
     print(f"Bob: {bob.address()}")
 
     # :!:>section_3
-    # alice_fund = faucet_client.fund_account(alice.address(), 100_000_000)
-    # bob_fund = faucet_client.fund_account(bob.address(), 0)  # <:!:section_3
-    # await asyncio.gather(*[alice_fund, bob_fund])
+    print("\n=== Fund Accounts ===")
+    await rest_client.fund_account(alice)
+    await rest_client.fund_account(bob)  # <:!:section_3
+
 
     print("\n=== Initial Balances ===")
     # :!:>section_4
@@ -55,7 +49,9 @@ async def main():
     bob_balance = rest_client.account_balance(bob.address())
     [alice_balance, bob_balance] = await asyncio.gather(*[alice_balance, bob_balance])
     print(f"Alice: {alice_balance}")
-    print(f"Bob: {bob_balance}")  # <:!:section_4
+    print(f"Bob: {bob_balance}")  
+    
+    
 
     # Have Alice give Bob another 1_000 coins using BCS
     txn_hash = await rest_client.bcs_transfer(alice, bob.address(), 1_000)
@@ -68,30 +64,6 @@ async def main():
     [alice_balance, bob_balance] = await asyncio.gather(*[alice_balance, bob_balance])
     print(f"Alice: {alice_balance}")
     print(f"Bob: {bob_balance}")
-
-    if indexer_client:
-        query = """
-            query TransactionsQuery($account: String) {
-              account_transactions(
-                limit: 20
-                where: {account_address: {_eq: $account}}
-              ) {
-                transaction_version
-                coin_activities {
-                  amount
-                  activity_type
-                  coin_type
-                  entry_function_id_str
-                  owner_address
-                  transaction_timestamp
-                }
-              }
-            }
-        """
-
-        variables = {"account": f"{bob.address()}"}
-        data = await indexer_client.query(query, variables)
-        assert len(data["data"]["account_transactions"]) > 0
 
     await rest_client.close()
 

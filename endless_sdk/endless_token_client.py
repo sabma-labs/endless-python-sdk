@@ -4,12 +4,12 @@
 
 from __future__ import annotations
 
-from typing import Any, List, Tuple
-
+from typing import Any, List, Tuple , Optional
+import pdb
 from .account import Account
 from .account_address import AccountAddress
 from .async_client import RestClient
-from .bcs import Deserializer, Serializer
+from .bcs import Deserializer, Serializer ,Serializable
 from .transactions import EntryFunction, TransactionArgument, TransactionPayload
 from .type_tag import StructTag, TypeTag
 
@@ -61,8 +61,48 @@ class Collection:
             resource["uri"],
         )
 
+# class Option(Serializable):
+#     """
+#     An optional wrapper for Move types, similar to Rust's Option<T>.
+#     Holds either zero or one element of type T.
+#     """
+#     def __init__(self, value = None) -> None:
+#         super().__init__()
+#         if value is not None:
+#             self._vec = [value]
+#         else:
+#             self._vec = []
+#         # Expose the single value or None
+#         self.value  = self._vec.values[0] if self._vec.values else None
 
-class Royalty:
+#     def unwrap(self) -> T:
+#         """
+#         Retrieve the inner value, or raise if empty.
+
+#         Raises:
+#             ValueError: if the option is empty.
+
+#         Returns:
+#             The contained T value.
+#         """
+#         if not self.is_some():
+#             raise ValueError("Called unwrap on an empty MoveOption")
+#         # At this point, _vec.values has exactly one element
+#         return self._vec.values[0]
+
+#     def is_some(self) -> bool:
+#         """
+#         Returns True if the option contains a value.
+#         """
+#         return len(self._vec.values) == 1
+
+#     def serialize(self, serializer: Serializer) -> None:
+#         """
+#         Serialize the option (0 or 1, followed by the value if present) in BCS.
+#         """
+#         self._vec.serialize(serializer)
+
+class Royalty(Serializable):
     numerator: int
     denominator: int
     payee_address: AccountAddress
@@ -84,6 +124,10 @@ class Royalty:
             resource["denominator"],
             AccountAddress.from_str_relaxed(resource["payee_address"]),
         )
+    def serialize(self,serializer: Serializer):
+        serializer.u64(self.numerator)
+        serializer.u64(self.denominator)
+        serializer.address(str(self.payee_address))  # or .hex() / .address_str
 
 
 class Token:
@@ -339,88 +383,85 @@ class EndlessTokenClient:
                 resources[resource_obj] = resource_obj.parse(resource["data"])
         return ReadObject(resources)
 
+    # @staticmethod
+    # def create_collection_payload(
+    #     description: str,
+    #     max_supply: int,
+    #     name: str,
+    #     royalty: Optional[Royalty],
+    #     uri: str,
+    # ) -> TransactionPayload:
+    #     s = Serializer()
+    #     opt_royalty_ser = Serializer.option_serializer(Serializer.struct)
+    #     opt_royalty_ser(s, royalty)
+    #     raw = s.output()
+    #     print(raw)
+    #     transaction_arguments = [
+    #         TransactionArgument(description, Serializer.str),
+    #         TransactionArgument(max_supply, Serializer.u64),
+    #         TransactionArgument(name, Serializer.str),
+    #         TransactionArgument(raw,Serializer.fixed_bytes),
+    #         TransactionArgument(uri, Serializer.str),
+    #     ]
+        
+    #     for i, arg in enumerate(transaction_arguments):
+    #         b = arg.encode()
+    #         print(f"arg#{i} ({type(arg.value).__name__}): {b.hex()} len={len(b)}")
+
+    #     payload = EntryFunction.natural(
+    #         "0x4::collection",
+    #         "create_fixed_collection",
+    #         [],
+    #         transaction_arguments,
+    #     )
+
+    #     return TransactionPayload(payload)
     @staticmethod
     def create_collection_payload(
         description: str,
         max_supply: int,
         name: str,
+        royalty: Optional[Royalty],
         uri: str,
-        mutable_description: bool,
-        mutable_royalty: bool,
-        mutable_uri: bool,
-        mutable_token_description: bool,
-        mutable_token_name: bool,
-        mutable_token_properties: bool,
-        mutable_token_uri: bool,
-        tokens_burnable_by_creator: bool,
-        tokens_freezable_by_creator: bool,
-        royalty_numerator: int,
-        royalty_denominator: int,
     ) -> TransactionPayload:
-        transaction_arguments = [
+        # Build args with the right serializers:
+        args = [
             TransactionArgument(description, Serializer.str),
-            TransactionArgument(max_supply, Serializer.u64),
-            TransactionArgument(name, Serializer.str),
-            TransactionArgument(uri, Serializer.str),
-            TransactionArgument(mutable_description, Serializer.bool),
-            TransactionArgument(mutable_royalty, Serializer.bool),
-            TransactionArgument(mutable_uri, Serializer.bool),
-            TransactionArgument(mutable_token_description, Serializer.bool),
-            TransactionArgument(mutable_token_name, Serializer.bool),
-            TransactionArgument(mutable_token_properties, Serializer.bool),
-            TransactionArgument(mutable_token_uri, Serializer.bool),
-            TransactionArgument(tokens_burnable_by_creator, Serializer.bool),
-            TransactionArgument(tokens_freezable_by_creator, Serializer.bool),
-            TransactionArgument(royalty_numerator, Serializer.u64),
-            TransactionArgument(royalty_denominator, Serializer.u64),
+            TransactionArgument(max_supply,    Serializer.u64),
+            TransactionArgument(name,          Serializer.str),
+            TransactionArgument(royalty,       Serializer.option_serializer(Serializer.struct)),
+            TransactionArgument(uri,           Serializer.str),
         ]
-
         payload = EntryFunction.natural(
-            "0x4::endless_token",
-            "create_collection",
-            [],
-            transaction_arguments,
+            "0x4::collection",
+            "create_fixed_collection",
+            [],      # no type parameters
+            args,
         )
-
         return TransactionPayload(payload)
-
     # :!:>create_collection
     async def create_collection(
         self,
         creator: Account,
         description: str,
-        max_supply: int,
+        max_supply: int, 
         name: str,
         uri: str,
-        mutable_description: bool,
-        mutable_royalty: bool,
-        mutable_uri: bool,
-        mutable_token_description: bool,
-        mutable_token_name: bool,
-        mutable_token_properties: bool,
-        mutable_token_uri: bool,
-        tokens_burnable_by_creator: bool,
-        tokens_freezable_by_creator: bool,
         royalty_numerator: int,
         royalty_denominator: int,
     ) -> str:  # <:!:create_collection
+        royalty =  Royalty(royalty_numerator,royalty_denominator, creator.address())
+        
         payload = EndlessTokenClient.create_collection_payload(
             description,
             max_supply,
             name,
+            royalty,
             uri,
-            mutable_description,
-            mutable_royalty,
-            mutable_uri,
-            mutable_token_description,
-            mutable_token_name,
-            mutable_token_properties,
-            mutable_token_uri,
-            tokens_burnable_by_creator,
-            tokens_freezable_by_creator,
-            royalty_numerator,
-            royalty_denominator,
         )
+        
+        print("JSON args:", payload.__str__())
+
         signed_transaction = await self.client.create_bcs_signed_transaction(
             creator, payload
         )

@@ -64,9 +64,11 @@ class RestClient:
     client: httpx.AsyncClient
     client_config: ClientConfig
     base_url: str
+    indexer_url: str
 
-    def __init__(self, base_url: str, client_config: ClientConfig = ClientConfig()):
+    def __init__(self, base_url: str,indexer_url, client_config: ClientConfig = ClientConfig()):
         self.base_url = base_url
+        self.indexer_url = indexer_url
         # Default limits
         limits = httpx.Limits()
         # Default timeouts but do not set a pool timeout, since the idea is that jobs will wait as
@@ -115,7 +117,50 @@ class RestClient:
         if response.status_code >= 400:
             raise ApiError(f"{response.text} - {account_address}", response.status_code)
         return response.json()
+    
+    async def create_account(self, account: Account):
+        transaction_arguments = [
+        TransactionArgument(account.address(), Serializer.struct),
+        ]
+        payload = EntryFunction.natural(
+        "0x1::endless_account",
+        "create_account",
+        [],
+        transaction_arguments,
+        )
+    
+        signed_transaction = await self.create_bcs_signed_transaction(
+            account, TransactionPayload(payload)
+        )
+        
+        return await self.submit_and_wait_for_bcs_transaction(signed_transaction)
+        
+        
+        
 
+    async def fund_account(self,account: Union[Account,AccountAddress]):
+        if isinstance(account, Account):
+            address = account.address()
+        elif isinstance(account, AccountAddress):
+            address = account
+        else:
+            raise TypeError("Expected Account or AccountAddress")
+        transaction_arguments = [
+        TransactionArgument(address, Serializer.struct),
+        ]
+
+        payload = EntryFunction.natural(
+            "0x1::faucet",
+            "fund",
+            [],
+            transaction_arguments,
+        )
+        signed_transaction = await self.create_bcs_signed_transaction(
+            account, TransactionPayload(payload)
+        )
+        
+        return await self.submit_and_wait_for_bcs_transaction(signed_transaction)
+        
     async def account_balance(
         self, account_address: AccountAddress, ledger_version: Optional[int] = None
     ) -> int:
