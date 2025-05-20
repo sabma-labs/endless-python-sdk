@@ -140,6 +140,11 @@ class MultiPublicKey(asymmetric_crypto.PublicKey):
     MAX_KEYS = 32
     MIN_THRESHOLD = 1
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, MultiPublicKey):
+            return NotImplemented
+        return (self.threshold == other.threshold) and (self.keys == other.keys
+
     def __init__(self, keys: List[PublicKey], threshold: int):
         assert (
             self.MIN_KEYS <= len(keys) <= self.MAX_KEYS
