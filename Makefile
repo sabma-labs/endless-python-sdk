@@ -30,7 +30,6 @@ examples:
 	poetry run python -m examples.simple_nft
 	poetry run python -m examples.simulate_transfer_coin
 	poetry run python -m examples.transfer_coin
-	poetry run python -m examples.transfer_two_by_two
 	poetry run python -m examples.multikey
 
 examples_cli:
@@ -40,7 +39,5 @@ examples_cli:
 	poetry run python -m examples.object_code_deployment
 	poetry run python -m examples.your_coin
 
-integration_test:
-	poetry run python -m unittest -b examples.integration_test
 
 .PHONY: examples fmt lint test

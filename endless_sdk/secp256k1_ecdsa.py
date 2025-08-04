@@ -275,3 +275,7 @@ class Test(unittest.TestCase):
         signature.serialize(ser)
         ser_signature = Signature.deserialize(Deserializer(ser.output()))
         self.assertEqual(signature, ser_signature)
+
+
+if __name__ == "__main__":
+    unittest.main()

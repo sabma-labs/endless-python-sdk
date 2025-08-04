@@ -454,3 +454,7 @@ class Test(unittest.TestCase):
             AssertionError, "Threshold must be between 1 and 4."
         ):
             MultiPublicKey.from_bytes(MultiPublicKey(keys[0:4], 5).to_bytes())
+
+
+if __name__ == "__main__":
+    unittest.main()

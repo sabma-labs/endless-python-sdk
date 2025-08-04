@@ -651,3 +651,7 @@ class Test(unittest.TestCase):
         self.assertRaises(
             RuntimeError, AccountAddress.from_str, ADDRESS_OTHER.longWithout0x
         )
+
+
+if __name__ == "__main__":
+    unittest.main()

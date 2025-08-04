@@ -178,3 +178,7 @@ class Test(unittest.TestCase):
             "9ace35e4458b9f22"
         )
         self.assertEqual(rotation_proof_challenge_bcs, expected_bytes)
+
+
+if __name__ == "__main__":
+    unittest.main()

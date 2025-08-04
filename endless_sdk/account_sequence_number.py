@@ -12,6 +12,7 @@ from typing import Callable, Optional
 
 from endless_sdk.account_address import AccountAddress
 from endless_sdk.async_client import ApiError, RestClient
+from endless_sdk.api_config import APIConfig , NetworkType
 
 
 class AccountSequenceNumberConfig:
@@ -176,8 +177,9 @@ class Test(unittest.IsolatedAsyncioTestCase):
             "endless_sdk.async_client.RestClient.account_sequence_number", return_value=0
         )
         patcher.start()
-
-        rest_client = RestClient("https://rpc-test.endless.link/v1")
+        config_type = NetworkType.TESTNET  # Change to MAINNET or TESTNET as needed.
+        api_config = APIConfig(config_type)
+        rest_client = RestClient(api_config.NODE_URL,api_config.INDEXER_URL)
         account_sequence_number = AccountSequenceNumber(
             rest_client, AccountAddress.from_str("0xf")
         )
@@ -210,3 +212,7 @@ class Test(unittest.IsolatedAsyncioTestCase):
         self.assertNotEqual(account_sequence_number._current_number, last_seq_num)
         await account_sequence_number.synchronize()
         self.assertEqual(account_sequence_number._current_number, next_sequence_number)
+
+
+if __name__ == "__main__":
+    unittest.main()

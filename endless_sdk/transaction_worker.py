@@ -12,6 +12,7 @@ from endless_sdk.account import Account
 from endless_sdk.account_address import AccountAddress
 from endless_sdk.account_sequence_number import AccountSequenceNumber
 from endless_sdk.async_client import RestClient
+from endless_sdk.api_config import APIConfig , NetworkType
 from endless_sdk.bcs import Serializer
 from endless_sdk.transactions import (
     EntryFunction,
@@ -203,7 +204,9 @@ class Test(unittest.IsolatedAsyncioTestCase):
         )
         submit_txn_patcher.start()
 
-        rest_client = RestClient("https://rpc-test.endless.link/v1")
+        config_type = NetworkType.TESTNET  # Change to MAINNET or TESTNET as needed.
+        api_config = APIConfig(config_type)
+        rest_client = RestClient(api_config.NODE_URL,api_config.INDEXER_URL)
         txn_queue = TransactionQueue(rest_client)
         txn_worker = TransactionWorker(Account.generate(), rest_client, txn_queue.next)
         txn_worker.start()
@@ -229,3 +232,7 @@ class Test(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(processed_txn[2], exception)
 
         txn_worker.stop()
+
+
+if __name__ == "__main__":
+    unittest.main()

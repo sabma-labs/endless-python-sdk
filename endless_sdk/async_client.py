@@ -25,7 +25,6 @@ from .transactions import (
 from .type_tag import StructTag, TypeTag
 
 U64_MAX = 18446744073709551615
-from endless_sdk.bcs import encoder 
 
 @dataclass
 class ClientConfig:
@@ -66,7 +65,7 @@ class RestClient:
     base_url: str
     indexer_url: str
 
-    def __init__(self, base_url: str,indexer_url, client_config: ClientConfig = ClientConfig()):
+    def __init__(self, base_url: str, indexer_url, client_config: ClientConfig = ClientConfig()):
         self.base_url = base_url
         self.indexer_url = indexer_url
         # Default limits
@@ -139,6 +138,17 @@ class RestClient:
         
 
     async def fund_account(self,account: Union[Account,AccountAddress]):
+        """
+        Fund a target address using the Move function `0x1::faucet::fund(dst_addr: address)`.
+
+        This function constructs and submits a transaction to call the on-chain faucet module
+        that sends testnet tokens to the given address.
+
+        Args:
+            acount (Union[Account, AccountAddress]): The recipient account or address to fund.
+        Returns:
+            dict: The result of `submit_and_wait_for_bcs_transaction`, typically containing transaction status and hash.
+        """
         if isinstance(account, Account):
             address = account.address()
         elif isinstance(account, AccountAddress):
@@ -791,8 +801,6 @@ class RestClient:
         signed_transaction = await self.create_bcs_signed_transaction(
             sender, TransactionPayload(payload), sequence_number=sequence_number
         )
-        # serialized = encoder(signed_transaction)
-        # print(f"Serialized BCS: {serialized.hex()}")
 
         
         

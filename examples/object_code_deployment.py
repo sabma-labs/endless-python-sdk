@@ -8,14 +8,14 @@ import sys
 
 from endless_sdk.account import Account
 from endless_sdk.endless_cli_wrapper import EndlessCLIWrapper
-from endless_sdk.async_client import FaucetClient, RestClient
+from endless_sdk.async_client import RestClient
 from endless_sdk.package_publisher import MODULE_ADDRESS, PackagePublisher, PublishMode
 from endless_sdk.api_config import APIConfig , NetworkType
-from .common import ENDLESS_CORE_PATH, FAUCET_AUTH_TOKEN, FAUCET_URL, NODE_URL
+from .common import ENDLESS_CORE_PATH
 
 
 async def main(package_dir):
-    config_type = NetworkType.LOCAL  # Change to MAINNET or TESTNET as needed.
+    config_type = NetworkType.TESTNET  # Change to MAINNET or TESTNET as needed.
     api_config = APIConfig(config_type)
     rest_client = RestClient(api_config.NODE_URL,api_config.INDEXER_URL)    
     package_publisher = PackagePublisher(rest_client)

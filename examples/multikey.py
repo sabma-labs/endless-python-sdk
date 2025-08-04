@@ -8,7 +8,7 @@ from endless_sdk import asymmetric_crypto_wrapper, ed25519, secp256k1_ecdsa
 from endless_sdk.account import Account
 from endless_sdk.account_address import AccountAddress
 from endless_sdk.asymmetric_crypto_wrapper import MultiSignature, Signature
-from endless_sdk.async_client import FaucetClient, IndexerClient, RestClient
+from endless_sdk.async_client import RestClient
 from endless_sdk.authenticator import AccountAuthenticator, MultiKeyAuthenticator
 from endless_sdk.bcs import Serializer
 from endless_sdk.api_config import APIConfig , NetworkType
@@ -19,7 +19,6 @@ from endless_sdk.transactions import (
     TransactionPayload,
 )
 
-from .common import FAUCET_AUTH_TOKEN, FAUCET_URL, INDEXER_URL, NODE_URL
 
 
 async def main():

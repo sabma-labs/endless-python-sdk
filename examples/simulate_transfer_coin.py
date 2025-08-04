@@ -6,16 +6,15 @@ import asyncio
 import json
 
 from endless_sdk.account import Account
-from endless_sdk.async_client import FaucetClient, RestClient
+from endless_sdk.async_client import  RestClient
 from endless_sdk.bcs import Serializer
 from endless_sdk.transactions import (
     EntryFunction,
     TransactionArgument,
     TransactionPayload,
 )
-from endless_sdk.type_tag import StructTag, TypeTag
 from endless_sdk.api_config import APIConfig , NetworkType
-from .common import NODE_URL
+
 
 
 async def main():

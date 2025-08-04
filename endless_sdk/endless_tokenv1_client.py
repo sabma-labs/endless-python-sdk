@@ -9,7 +9,7 @@ from .async_client import ApiError, RestClient
 from .bcs import Serializer
 from .transactions import EntryFunction, TransactionArgument, TransactionPayload
 from .type_tag import TypeTag, StructTag
-
+from typing import Optional, List
 import base58
 import aiohttp
 import json
@@ -94,56 +94,70 @@ class EndlessTokenV1Client:
         self._client = client
 
     async def create_collection(
-        self, account: Account, name: str, description: str, uri: str
+        self,
+        account: Account,
+        name: str,
+        description: str,
+        uri: str,
+        mutable_description: bool = True,
+        mutable_royalty: bool = True,
+        mutable_uri: bool = True,
+        mutable_token_description: bool = True,
+        mutable_token_name: bool = True,
+        mutable_token_properties: bool = True,
+        mutable_token_uri: bool = True,
+        tokens_burnable_by_creator: bool = True,
+        tokens_freezable_by_creator: bool = True,
+        royalty_numerator: int = 0,
+        royalty_denominator: int = 990,
     ) -> str:
-        """Creates a new collection within the specified account"""
+        """
+        Creates a new collection for the specified account.
 
+        Args:
+            account (Account): The account creating the collection.
+            name (str): Name of the collection.
+            description (str): Description of the collection.
+            uri (str): URI for metadata.
+            mutable_* (bool): Flags for mutability of various metadata fields.
+            tokens_burnable_by_creator (bool): If tokens in the collection can be burned.
+            tokens_freezable_by_creator (bool): If tokens in the collection can be frozen.
+            royalty_numerator (int): Royalty numerator.
+            royalty_denominator (int): Royalty denominator.
+
+        Returns:
+            str: Transaction hash or ID.
+        """
         transaction_arguments = [
             TransactionArgument(description, Serializer.str),
             TransactionArgument(U64_MAX, Serializer.u64),
             TransactionArgument(name, Serializer.str),
             TransactionArgument(uri, Serializer.str),
-            TransactionArgument(True, Serializer.bool),
-            TransactionArgument(True, Serializer.bool),
-            TransactionArgument(True, Serializer.bool),
-            TransactionArgument(True, Serializer.bool),
-            TransactionArgument(True, Serializer.bool),
-            TransactionArgument(True, Serializer.bool),
-            TransactionArgument(True, Serializer.bool),
-            TransactionArgument(True, Serializer.bool),
-            TransactionArgument(True, Serializer.bool),
-            TransactionArgument(0, Serializer.u64),
-            TransactionArgument(990, Serializer.u64),
+            TransactionArgument(mutable_description, Serializer.bool),
+            TransactionArgument(mutable_royalty, Serializer.bool),
+            TransactionArgument(mutable_uri, Serializer.bool),
+            TransactionArgument(mutable_token_description, Serializer.bool),
+            TransactionArgument(mutable_token_name, Serializer.bool),
+            TransactionArgument(mutable_token_properties, Serializer.bool),
+            TransactionArgument(mutable_token_uri, Serializer.bool),
+            TransactionArgument(tokens_burnable_by_creator, Serializer.bool),
+            TransactionArgument(tokens_freezable_by_creator, Serializer.bool),
+            TransactionArgument(royalty_numerator, Serializer.u64),
+            TransactionArgument(royalty_denominator, Serializer.u64),
         ]
 
-        # creator: & signer,
-        # description: String,
-        # max_supply: u64,
-        # name: String,
-        # uri: String,
-        # mutable_description: bool,
-        # mutable_royalty: bool,
-        # mutable_uri: bool,
-        # mutable_token_description: bool,
-        # mutable_token_name: bool,
-        # mutable_token_properties: bool,
-        # mutable_token_uri: bool,
-        # tokens_burnable_by_creator: bool,
-        # tokens_freezable_by_creator: bool,
-        # royalty_numerator: u64,
-        # royalty_denominator: u64,
-
         payload = EntryFunction.natural(
-            "0x4::nft",
-            "create_collection",
-            [],
-            transaction_arguments,
+            module="0x4::nft",
+            function="create_collection",
+            ty_args=[],
+            args=transaction_arguments,
         )
 
-        signed_transaction = await self._client.create_bcs_signed_transaction(
+        signed_txn = await self._client.create_bcs_signed_transaction(
             account, TransactionPayload(payload)
         )
-        return await self._client.submit_bcs_transaction(signed_transaction)
+
+        return await self._client.submit_bcs_transaction(signed_txn)
 
     async def create_token(
         self,
@@ -152,42 +166,39 @@ class EndlessTokenV1Client:
         name: str,
         description: str,
         uri: str,
+        property_keys: Optional[List[str]] = None,
+        property_types: Optional[List[str]] = None,
+        property_values: Optional[List[bytes]] = None,
     ) -> str:
+        """
+        Mints a new token into an existing NFT collection.
 
-        # collection: String,
-        # description: String,
-        # name: String,
-        # uri: String,
-        # property_keys: vector < String >,
-        # property_types: vector < String >,
-        # property_values: vector < vector < u8 >>,
+        Args:
+            account (Account): The signer account (creator of the token).
+            collection_name (str): The name of the NFT collection.
+            name (str): The name of the token/NFT.
+            description (str): A short description of the token.
+            uri (str): A URI pointing to the token metadata.
+            property_keys (List[str], optional): Custom property keys. Defaults to [].
+            property_types (List[str], optional): Types of the custom properties. Defaults to [].
+            property_values (List[bytes], optional): Raw byte values for properties. Defaults to [].
+
+        Returns:
+            str: The transaction hash or ID.
+        """
+        property_keys = property_keys or []
+        property_types = property_types or []
+        property_values = property_values or []
 
         transaction_arguments = [
             TransactionArgument(collection_name, Serializer.str),
             TransactionArgument(description, Serializer.str),
             TransactionArgument(name, Serializer.str),
             TransactionArgument(uri, Serializer.str),
-            TransactionArgument([], Serializer.sequence_serializer(Serializer.str)),
-            TransactionArgument([], Serializer.sequence_serializer(Serializer.str)),
-            TransactionArgument([], Serializer.sequence_serializer(Serializer.u8))
-
-
-            # TransactionArgument(supply, Serializer.u64),
-            # TransactionArgument(supply, Serializer.u64),
-
-            # TransactionArgument(account.address(), Serializer.struct),
-            # SDK assumes per million
-            # TransactionArgument(1000000, Serializer.u64),
-            # TransactionArgument(royalty_points_per_million, Serializer.u64),
-            # TransactionArgument(
-            #     [False, False, False, False, False],
-            #     Serializer.sequence_serializer(Serializer.bool),
-            # ),
-            # TransactionArgument([], Serializer.sequence_serializer(Serializer.str)),
-            # TransactionArgument(
-            #     [], Serializer.sequence_serializer(Serializer.to_bytes)
-            # ),
-            # TransactionArgument([], Serializer.sequence_serializer(Serializer.str)),
+            TransactionArgument(property_keys, Serializer.sequence_serializer(Serializer.str)),
+            TransactionArgument(property_types, Serializer.sequence_serializer(Serializer.str)),
+            TransactionArgument(property_values, Serializer.sequence_serializer(
+                Serializer.sequence_serializer(Serializer.u8))),
         ]
 
         payload = EntryFunction.natural(
@@ -196,31 +207,22 @@ class EndlessTokenV1Client:
             [],
             transaction_arguments,
         )
+
         signed_transaction = await self._client.create_bcs_signed_transaction(
             account, TransactionPayload(payload)
         )
-        return await self._client.submit_bcs_transaction(signed_transaction)
 
+        return await self._client.submit_bcs_transaction(signed_transaction)
+    
     async def offer_token(
         self,
         account: Account,
         receiver: AccountAddress,
-        creator: AccountAddress,
-        collection_name: str,
-        token_name: str,
-        property_version: int,
-        amount: int,
         token_address: AccountAddress,
     ) -> str:
         transaction_arguments = [
-            # TransactionArgument(creator, Serializer.struct),
             TransactionArgument(token_address, Serializer.struct),
             TransactionArgument(receiver, Serializer.struct),
-            # TransactionArgument(creator, Serializer.struct),
-            # TransactionArgument(collection_name, Serializer.str),
-            # TransactionArgument(token_name, Serializer.str),
-            # TransactionArgument(property_version, Serializer.u64),
-            # TransactionArgument(amount, Serializer.u64),
         ]
 
         payload = EntryFunction.natural(
@@ -307,34 +309,9 @@ class EndlessTokenV1Client:
         property_version: int,
     ) -> Any:
         resource = await self._client.account_resource(owner, "0x4::collection::ConcurrentSupply")
-        # resource = await self._client.account_resource(owner, "0x4::token::Token")
         return resource["data"]
 
-        # token_store_handle = resource["data"]["tokens"]["handle"]
-
-        # token_id = {
-        #     "token_data_id": {
-        #         "creator": str(creator),
-        #         "collection": collection_name,
-        #         "name": token_name,
-        #     },
-        #     "property_version": str(property_version),
-        # }
-        #
-        # try:
-        #     return await self._client.get_table_item(
-        #         token_store_handle,
-        #         "0x3::token::TokenId",
-        #         "0x3::token::Token",
-        #         token_id,
-        #     )
-        # except ApiError as e:
-        #     if e.status_code == 404:
-        #         return {
-        #             "id": token_id,
-        #             "amount": "0",
-        #         }
-        #     raise
+       
 
     async def get_token_balance(
         self,
@@ -348,34 +325,6 @@ class EndlessTokenV1Client:
             owner, creator, collection_name, token_name, property_version
         )
         return info
-        # return info["amount"]
-
-    # async def get_token_data(
-    #     self,
-    #     creator: AccountAddress,
-    #     collection_name: str,
-    #     token_name: str,
-    #     property_version: int,
-    # ) -> Any:
-    #     resource = await self._client.account_resource(
-    #         creator, "0x4::token::Token"
-    #     )
-    #     return resource["data"]
-
-    #     # token_data_handle = resource["data"]["token_data"]["handle"]
-    #     #
-    #     # token_data_id = {
-    #     #     "creator": str(creator),
-    #     #     "collection": collection_name,
-    #     #     "name": token_name,
-    #     # }
-    #     #
-    #     # return await self._client.get_table_item(
-    #     #     token_data_handle,
-    #     #     "0x3::token::TokenDataId",
-    #     #     "0x3::token::TokenData",
-    #     #     token_data_id,
-    #     # )  # <:!:read_token_data_table
     
     async def get_token_data(
         self,
@@ -433,25 +382,6 @@ class EndlessTokenV1Client:
             print(f"An error occurred while fetching token data: {e}")
             return None
 
-
-
-    # async def get_collection(
-    #     self, creator: AccountAddress, collection_name: str
-    # ) -> Any:
-    #     resource = await self._client.account_resource(
-    #         creator, "0x4::collection::Collection"
-    #     )
-    #     return resource["data"]
-
-    #     # token_data = resource["data"]["collection_data"]["handle"]
-    #     #
-    #     # return await self._client.get_table_item(
-    #     #     token_data,
-    #     #     "0x1::string::String",
-    #     #     "0x3::token::CollectionData",
-    #     #     collection_name,
-    #     # )
-    
 
     async def get_collection(self, creator: str, collection_name: str) -> Any:
         

@@ -8,7 +8,7 @@ import time
 
 from endless_sdk.account import Account, RotationProofChallenge
 from endless_sdk.account_address import AccountAddress
-from endless_sdk.async_client import FaucetClient, RestClient
+from endless_sdk.async_client import RestClient
 from endless_sdk.authenticator import Authenticator, MultiEd25519Authenticator
 from endless_sdk.bcs import Serializer
 from endless_sdk.ed25519 import MultiPublicKey, MultiSignature
@@ -21,9 +21,9 @@ from endless_sdk.transactions import (
     TransactionArgument,
     TransactionPayload,
 )
-from endless_sdk.type_tag import StructTag, TypeTag
+
 from endless_sdk.api_config import APIConfig , NetworkType
-from .common import ENDLESS_CORE_PATH, FAUCET_AUTH_TOKEN, FAUCET_URL, NODE_URL
+
 
 should_wait = True
 

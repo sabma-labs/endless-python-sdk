@@ -428,3 +428,7 @@ class Test(unittest.TestCase):
         ser = Serializer()
         txn_auth.serialize(ser)
         self.assertEqual(expected_output, ser.output())
+
+
+if __name__ == "__main__":
+    unittest.main()

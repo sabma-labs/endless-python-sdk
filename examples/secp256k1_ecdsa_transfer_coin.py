@@ -5,14 +5,12 @@
 import asyncio
 
 from endless_sdk.account import Account
-from endless_sdk.async_client import FaucetClient, RestClient
+from endless_sdk.async_client import  RestClient
 from endless_sdk.api_config import APIConfig , NetworkType
-from .common import FAUCET_AUTH_TOKEN, FAUCET_URL, NODE_URL
-
 
 async def main():
     # :!:>section_1
-    config_type = NetworkType.LOCAL  # Change to MAINNET or TESTNET as needed.
+    config_type = NetworkType.TESTNET  # Change to MAINNET or TESTNET as needed.
     api_config = APIConfig(config_type)
     rest_client = RestClient(api_config.NODE_URL,api_config.INDEXER_URL)  # <:!:section_1
 
@@ -25,9 +23,9 @@ async def main():
     print(f"Bob: {bob.address()}")
 
     # :!:>section_3
-    alice_fund = await rest_client.fund_account(alice.address(), 100_000_000)
-    bob_fund = await rest_client.fund_account(bob.address(), 0)  # <:!:section_3
-    await asyncio.gather(*[alice_fund, bob_fund])
+    print("\n=== Fund Accounts ===")
+    await rest_client.fund_account(alice)
+    await rest_client.fund_account(bob)  # <:!:section_3
 
     print("\n=== Initial Balances ===")
     # :!:>section_4

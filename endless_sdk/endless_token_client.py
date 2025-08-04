@@ -61,47 +61,6 @@ class Collection:
             resource["uri"],
         )
 
-# class Option(Serializable):
-#     """
-#     An optional wrapper for Move types, similar to Rust's Option<T>.
-#     Holds either zero or one element of type T.
-#     """
-#     def __init__(self, value = None) -> None:
-#         super().__init__()
-#         if value is not None:
-#             self._vec = [value]
-#         else:
-#             self._vec = []
-#         # Expose the single value or None
-#         self.value  = self._vec.values[0] if self._vec.values else None
-
-#     def unwrap(self) -> T:
-#         """
-#         Retrieve the inner value, or raise if empty.
-
-#         Raises:
-#             ValueError: if the option is empty.
-
-#         Returns:
-#             The contained T value.
-#         """
-#         if not self.is_some():
-#             raise ValueError("Called unwrap on an empty MoveOption")
-#         # At this point, _vec.values has exactly one element
-#         return self._vec.values[0]
-
-#     def is_some(self) -> bool:
-#         """
-#         Returns True if the option contains a value.
-#         """
-#         return len(self._vec.values) == 1
-
-#     def serialize(self, serializer: Serializer) -> None:
-#         """
-#         Serialize the option (0 or 1, followed by the value if present) in BCS.
-#         """
-#         self._vec.serialize(serializer)
-
 class Royalty(Serializable):
     numerator: int
     denominator: int
@@ -383,39 +342,6 @@ class EndlessTokenClient:
                 resources[resource_obj] = resource_obj.parse(resource["data"])
         return ReadObject(resources)
 
-    # @staticmethod
-    # def create_collection_payload(
-    #     description: str,
-    #     max_supply: int,
-    #     name: str,
-    #     royalty: Optional[Royalty],
-    #     uri: str,
-    # ) -> TransactionPayload:
-    #     s = Serializer()
-    #     opt_royalty_ser = Serializer.option_serializer(Serializer.struct)
-    #     opt_royalty_ser(s, royalty)
-    #     raw = s.output()
-    #     print(raw)
-    #     transaction_arguments = [
-    #         TransactionArgument(description, Serializer.str),
-    #         TransactionArgument(max_supply, Serializer.u64),
-    #         TransactionArgument(name, Serializer.str),
-    #         TransactionArgument(raw,Serializer.fixed_bytes),
-    #         TransactionArgument(uri, Serializer.str),
-    #     ]
-        
-    #     for i, arg in enumerate(transaction_arguments):
-    #         b = arg.encode()
-    #         print(f"arg#{i} ({type(arg.value).__name__}): {b.hex()} len={len(b)}")
-
-    #     payload = EntryFunction.natural(
-    #         "0x4::collection",
-    #         "create_fixed_collection",
-    #         [],
-    #         transaction_arguments,
-    #     )
-
-    #     return TransactionPayload(payload)
     @staticmethod
     def create_collection_payload(
         description: str,
@@ -439,6 +365,7 @@ class EndlessTokenClient:
             args,
         )
         return TransactionPayload(payload)
+    
     # :!:>create_collection
     async def create_collection(
         self,

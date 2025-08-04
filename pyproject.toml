@@ -7,7 +7,7 @@ license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/endless-labs/endless-move-framework"
 homepage = "https://github.com/endless-labs/endless-move-framework"
-keywords = ["web3", "sdk", "endless", "blockchain"]
+keywords = ["web3", "sdk", "endless", "blockchain", "python"]
 
 [tool.setuptools.package-data]
 "endless-sdk" = ["py.typed"]
